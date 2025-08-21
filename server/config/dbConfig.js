@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const logger = require("../utils/logger");
 
 const MONGODB_URI =
 	process.env.NODE_ENV === "production"
@@ -8,12 +9,21 @@ const MONGODB_URI =
 module.exports = () => {
 	mongoose
 		.connect(MONGODB_URI)
-		.then(() => console.log("Connected to SWAPI DB"))
+		.then(() => {
+			logger.info("Connected to SWAPI database", {
+				database: {
+					uri: MONGODB_URI.replace(/\/\/.*@/, '//***:***@'), // Hide credentials
+					name: "swapi"
+				}
+			});
+		})
 		.catch((err) => {
-			console.log("Error connecting: ", err);
+			logger.error("Failed to connect to database", err, {
+				database: { uri: MONGODB_URI.replace(/\/\/.*@/, '//***:***@') }
+			});
 		});
 
-	mongoose.connection.on("error", (err) =>
-		console.log("Error after successful connection: ", err),
-	);
+	mongoose.connection.on("error", (err) => {
+		logger.error("Database connection error", err);
+	});
 };
