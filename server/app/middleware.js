@@ -5,10 +5,14 @@ const addAdURL = require("../middleware/addAdURL");
 const setEncoding = require("../middleware/encodingFormat");
 const setUrl = require("../middleware/setUrl");
 const { apiLimiter, apiSlowDown } = require("../middleware/limiters");
+const telemetryMiddleware = require("../middleware/telemetry");
 
 const allowedHeaders = ["GET"];
 
 const applyMiddleware = (app) => {
+	// Add telemetry middleware first to capture all requests
+	app.use(telemetryMiddleware);
+
 	app.use(cors());
 	app.use(express.json());
 
