@@ -1,14 +1,20 @@
 const adClickService = require("../services/adClickService");
+const logger = require("../utils/logger");
 
 const getAdsTxt = (req, res) => {
 	try {
 		const adTxtFile = adClickService.getAdsTxt();
-		console.log(adTxtFile);
+		logger.info("Served ads.txt file", {
+			requestId: req.requestId,
+			contentLength: adTxtFile.length
+		});
 
 		res.setHeader("Content-Type", "text/plain");
 		return res.status(200).send(adTxtFile);
 	} catch (error) {
-		console.error("Error reading ads.txt:", error);
+		logger.error("Error reading ads.txt", error, {
+			requestId: req.requestId
+		});
 		res.status(500).send("Unable to serve ads.txt");
 	}
 };
@@ -24,9 +30,21 @@ const addClick = async (req, res) => {
 			originType
 		);
 
+		logger.info("Click tracked successfully", {
+			requestId: req.requestId,
+			click: {
+				originType,
+				referrer,
+				userAgent: userAgent?.substring(0, 100) // Truncate for logging
+			}
+		});
+
 		return res.status(200).json({ message: "Click tracked", click: newClick });
 	} catch (error) {
-		console.error("Tracking Error: ", error);
+		logger.error("Failed to track click", error, {
+			requestId: req.requestId,
+			click: { originType, referrer }
+		});
 
 		return res
 			.status(400)
@@ -34,12 +52,21 @@ const addClick = async (req, res) => {
 	}
 };
 
-const getClicks = async (_, res) => {
+const getClicks = async (req, res) => {
 	try {
 		const allClicks = await adClickService.getClicks();
 
+		logger.info("Retrieved clicks data", {
+			requestId: req.requestId,
+			clickCount: allClicks.length
+		});
+
 		return res.status(200).json({ message: "Ok", clicks: allClicks });
 	} catch (error) {
+		logger.error("Failed to retrieve clicks", error, {
+			requestId: req.requestId
+		});
+
 		return res
 			.status(400)
 			.json({ message: "something went wrong", error: error.toString() });

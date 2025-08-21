@@ -6,6 +6,7 @@ const dbConfig = require("../config/dbConfig");
 const applyMiddleware = require("./middleware");
 const applyRoutes = require("./routes");
 const { applyConfig } = require("../config/config");
+const logger = require("../utils/logger");
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -26,7 +27,11 @@ if (process.env.NODE_ENV === "production") {
 
 const startServer = () => {
 	app.listen(PORT, () => {
-		console.log(`Server running on port ${PORT}`);
+		logger.info('Server started successfully', {
+			port: PORT,
+			environment: process.env.NODE_ENV || 'development',
+			nodeVersion: process.version,
+		});
 	});
 };
 
