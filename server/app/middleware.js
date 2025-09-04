@@ -5,10 +5,14 @@ const addAdURL = require("../middleware/addAdURL");
 const setEncoding = require("../middleware/encodingFormat");
 const setUrl = require("../middleware/setUrl");
 const { apiLimiter, apiSlowDown } = require("../middleware/limiters");
+const metricsMiddleware = require("../middleware/metricsMiddleware");
 
 const allowedHeaders = ["GET"];
 
 const applyMiddleware = (app) => {
+	// Add metrics middleware first to capture all requests
+	app.use(metricsMiddleware);
+
 	app.use(cors());
 	app.use(express.json());
 
